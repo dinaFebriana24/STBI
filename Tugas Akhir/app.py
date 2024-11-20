@@ -1,32 +1,39 @@
-from flask import Flask, render_template, request
-import os
-import pandas as pd
+import pickle
+import faiss
 from PIL import Image
 import torch
-import kagglehub
-import clip
 import faiss
-import matplotlib.pyplot as plt
+import clip
+import torch
+from flask import Flask, render_template, request
+import os
 
-# Setup Flask
-app = Flask(__name__)
 
-# Load data
-data_path = kagglehub.dataset_download('paramaggarwal/fashion-product-images-dataset')
-styles_path = os.path.join(data_path, 'fashion-dataset', 'styles.csv')
-images_folder = os.path.join(data_path, 'fashion-dataset', 'images')
-
-styles_df = pd.read_csv(styles_path, on_bad_lines='skip')
-styles_df['id'] = styles_df['id'].astype(str).str.strip().str.lower()
-styles_df = styles_df.dropna(subset=['productDisplayName'])
-
-styles_df['image_path'] = styles_df['id'].apply(lambda x: os.path.join(images_folder, x + '.jpg'))
-styles_df = styles_df[styles_df['image_path'].apply(os.path.isfile)]
-
-# Prepare CLIP
+# Load CLIP
 device = "cuda" if torch.cuda.is_available() else "cpu"
 clip_model, clip_preprocess = clip.load("ViT-B/32", device=device)
+print("CLIP test successful!")
 
+
+#Setup Flask
+app = Flask(__name__)
+app.config["UPLOAD_FOLDER"] = "static/uploads"
+os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+
+
+
+# Load preprocessed data
+with open("preprocessed/embeddings.pkl", "rb") as f:
+    styles_df = pickle.load(f)
+
+print("Loading text index...")
+text_index = faiss.read_index("preprocessed/text_index.faiss")
+print("Text index loaded.")
+print("Loading image index...")
+image_index = faiss.read_index("preprocessed/image_index.faiss")
+print("Image index loaded.")
+
+# Helper functions
 def get_clip_text_embeddings(texts):
     text_tokens = clip.tokenize(texts).to(device)
     with torch.no_grad():
@@ -40,21 +47,6 @@ def get_clip_image_embeddings(image_path):
         image_features = clip_model.encode_image(image)
     return image_features.cpu().numpy()
 
-# Generate embeddings for the dataset
-styles_df['text_embeddings'] = styles_df['productDisplayName'].apply(lambda x: get_clip_text_embeddings([x]))
-styles_df['image_embeddings'] = styles_df['image_path'].apply(get_clip_image_embeddings)
-
-# Build FAISS index
-text_embeddings_matrix = np.vstack(styles_df['text_embeddings'].values)
-image_embeddings_matrix = np.vstack(styles_df['image_embeddings'].values)
-
-text_index = faiss.IndexFlatL2(text_embeddings_matrix.shape[1])
-text_index.add(text_embeddings_matrix)
-
-image_index = faiss.IndexFlatL2(image_embeddings_matrix.shape[1])
-image_index.add(image_embeddings_matrix)
-
-# Search functions
 def search_similar_text(query, k=5):
     query_embedding = get_clip_text_embeddings([query])
     distances, indices = text_index.search(query_embedding, k)
@@ -65,6 +57,7 @@ def search_similar_image(image_path, k=5):
     distances, indices = image_index.search(query_embedding, k)
     return styles_df.iloc[indices[0]]
 
+# Routes
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -80,7 +73,7 @@ def search():
     elif query_type == "image":
         uploaded_file = request.files["query_image"]
         if uploaded_file:
-            image_path = os.path.join("static/uploads", uploaded_file.filename)
+            image_path = os.path.join(app.config["UPLOAD_FOLDER"], uploaded_file.filename)
             uploaded_file.save(image_path)
             results = search_similar_image(image_path)
         else:

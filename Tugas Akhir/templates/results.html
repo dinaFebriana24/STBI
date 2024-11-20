@@ -21,3 +21,20 @@
     </div>
 </body>
 </html>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Results</title>
+</head>
+<body>
+    <h1>Search Results</h1>
+    <ul>
+        {% for _, row in results %}
+        <li>
+            <img src="{{ row['image_path'] }}" alt="{{ row['productDisplayName'] }}" width="100" />
+            <p>{{ row['productDisplayName'] }}</p>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

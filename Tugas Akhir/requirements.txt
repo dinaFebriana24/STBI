@@ -1,10 +1,9 @@
-Flask
+flask
 torch
-clip-by-openai
-Pillow
+torchvision
 faiss-cpu
-numpy
-matplotlib
 pandas
-scikit-learn
+Pillow
+matplotlib
 kagglehub
+git+https://github.com/openai/CLIP.git

@@ -1,26 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <title>Fashion Product Search</title>
+    <title>Search</title>
 </head>
 <body>
-    <div class="container">
-        <h1>Fashion Product Search</h1>
-        <form action="/search" method="POST" enctype="multipart/form-data">
-            <div class="input-group">
-                <label for="query_text">Search by Text:</label>
-                <input type="text" id="query_text" name="query_text" placeholder="Enter description (e.g., Men's navy blue shirt)">
-            </div>
-            <div class="input-group">
-                <label for="query_image">Search by Image:</label>
-                <input type="file" id="query_image" name="query_image" accept="image/*">
-            </div>
-            <button type="submit" name="query_type" value="text">Search Text</button>
-            <button type="submit" name="query_type" value="image">Search Image</button>
-        </form>
-    </div>
+    <h1>Search Fashion Products</h1>
+    <form action="/search" method="POST" enctype="multipart/form-data">
+        <label for="query_type">Search by:</label>
+        <select name="query_type" id="query_type">
+            <option value="text">Text</option>
+            <option value="image">Image</option>
+        </select>
+        <br>
+        <input type="text" name="query_text" placeholder="Enter text query" />
+        <br>
+        <input type="file" name="query_image" />
+        <br>
+        <button type="submit">Search</button>
+    </form>
 </body>
 </html>
