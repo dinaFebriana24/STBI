@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Search Results</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Search Results</h1>
+        <div class="results-grid">
+            {% for _, row in results %}
+            <div class="result-card">
+                <img src="{{ row.image_path }}" alt="{{ row.productDisplayName }}">
+                <p>{{ row.productDisplayName }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        <a href="/">Back to Search</a>
+    </div>
+</body>
+</html>

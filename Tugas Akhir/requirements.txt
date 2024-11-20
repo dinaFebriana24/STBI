@@ -1,0 +1,10 @@
+Flask
+torch
+clip-by-openai
+Pillow
+faiss-cpu
+numpy
+matplotlib
+pandas
+scikit-learn
+kagglehub

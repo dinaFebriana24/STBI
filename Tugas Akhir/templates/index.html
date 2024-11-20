@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Fashion Product Search</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Fashion Product Search</h1>
+        <form action="/search" method="POST" enctype="multipart/form-data">
+            <div class="input-group">
+                <label for="query_text">Search by Text:</label>
+                <input type="text" id="query_text" name="query_text" placeholder="Enter description (e.g., Men's navy blue shirt)">
+            </div>
+            <div class="input-group">
+                <label for="query_image">Search by Image:</label>
+                <input type="file" id="query_image" name="query_image" accept="image/*">
+            </div>
+            <button type="submit" name="query_type" value="text">Search Text</button>
+            <button type="submit" name="query_type" value="image">Search Image</button>
+        </form>
+    </div>
+</body>
+</html>
